@@ -1,6 +1,6 @@
 import { Box, Typography, TextField } from "@mui/material";
 
-const Payment = (values, touched, errors, handleBlur, handleChange,) => {
+const Payment = ({ values, touched, errors, handleBlur, handleChange }) => {
     return (
         <Box m="30px 0">
             {/* CONTACT INFO */}
@@ -14,10 +14,10 @@ const Payment = (values, touched, errors, handleBlur, handleChange,) => {
                     label="Email"
                     onBlur={handleBlur}
                     onChange={handleChange}
-                    value={values.email}
-                    name="email"
-                    error={!!touched.email && !!errors.email}
-                    helperText={touched.email && errors.email}
+                    value={values.Email}
+                    name="Email"
+                    error={!!touched.Email && !!errors.Email}
+                    helperText={touched.Email && errors.Email}
                     sx={{ gridColumn: "span 4", marginBottom: "15px" }}
                 />
                 <TextField 
@@ -26,10 +26,10 @@ const Payment = (values, touched, errors, handleBlur, handleChange,) => {
                     label="Numero De Téléphone"
                     onBlur={handleBlur}
                     onChange={handleChange}
-                    value={values.numeroDeTelephone}
-                    name="numeroDeTelephone"
-                    error={!!touched.numeroDeTelephone && !!errors.numeroDeTelephone}
-                    helperText={touched.numeroDeTelephone && errors.numeroDeTelephone}
+                    value={values.NumeroDeTelephone}
+                    name="NumeroDeTelephone"
+                    error={!!touched.NumeroDeTelephone && !!errors.NumeroDeTelephone}
+                    helperText={touched.NumeroDeTelephone && errors.NumeroDeTelephone}
                     sx={{ gridColumn: "span 4" }}
                 />
             </Box>

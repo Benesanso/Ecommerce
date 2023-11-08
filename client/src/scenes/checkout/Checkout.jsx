@@ -14,24 +14,24 @@ const stripePromise = loadStripe(
 
 const initialValues = {
     adresseDeFacturation: {
-        prenoms: "",
+        prénoms: "",
         nomDeFamille: "",
         pays: "",
         rue: "",
         lieuDit: "",
         ville: "",
-        region: "",
+        région: "",
         codePostal: "",
     },
+    isSameAddress: true,
     adresseDeLivraison: {
-        isSameAddress: true,
-        prenoms: "",
+        prénoms: "",
         nomDeFamille: "",
         pays: "",
         rue: "",
         lieuDit: "",
         ville: "",
-        region: "",
+        région: "",
         codePostal: "",
     },
     Email: "",
@@ -41,53 +41,35 @@ const initialValues = {
 const checkoutSchema = [
     yup.object().shape({
         adresseDeFacturation: yup.object().shape({
-            prenoms: yup.string().required("required"),
+            prénoms: yup.string().required("required"),
             nomDeFamille: yup.string().required("required"),
             pays: yup.string().required("required"),
             rue: yup.string().required("required"),
             lieuDit: yup.string(),
             ville: yup.string().required("required"),
-            region: yup.string().required("required"),
+            région: yup.string().required("required"),
             codePostal: yup.string().required("required"),
         }),
-        adresseDeLivraison: yup.object().shape({
-            isSameAddress: yup.boolean(),
-            prenoms: yup.string().when("isSameAddress", {
-                is: false,
-                then: yup.string().required("required"),
-            }),
-            nomDeFamille: yup.string().when("isSameAddress", {
-                is: false,
-                then: yup.string().required("required"),
-            }),
-            pays: yup.string().when("isSameAddress", {
-                is: false,
-                then: yup.string().required("required"),
-            }),
-            rue:yup.string().when("isSameAddress", {
-                is: false,
-                then: yup.string().required("required"),
-            }),
-            lieuDit: yup.string(),
-            ville: yup.string().when("isSameAddress", {
-                is: false,
-                then: yup.string().required("required"),
-            }),
-            region: yup.string().when("isSameAddress", {
-                is: false,
-                then: yup.string().required("required"),
-            }),
-            codePostal: yup.string().when("isSameAddress", {
-                is: false,
-                then: yup.string().required("required"),
-            }),
+        isSameAddress: yup.boolean(),
+        adresseDeLivraison: yup.object().when('isSameAddress', {
+            is: false,
+            then: yup.object({
+                prénoms:yup.string().required("required"),
+                nomDeFamille:yup.string().required("required"),
+                pays:yup.string().required("required"),
+                rue:yup.string().required("required"),
+                lieuDit: yup.string(),
+                ville: yup.string().required("required"),
+                région: yup.string().required("required"),
+                codePostal: yup.string().required("required")
+            })
         }),
     }),
     yup.object().shape({
         Email: yup.string().required("required"),
         NumeroDeTelephone: yup.string().required("required"),
     })
-]
+];
 
 const Checkout = () => {
     const [activeStep, setActiveStep] = useState(0);
@@ -96,7 +78,10 @@ const Checkout = () => {
     const isSecondStep = activeStep === 1;
 
     const handleFormSubmit = async (values, actions) => {
+        console.log("Le formulaire a été soumis.");
+        console.log("activeStep avant mise à jour : ", activeStep);
         setActiveStep(activeStep + 1);
+        console.log("activeStep après mise à jour : ", activeStep);
 
         // copies the billing address on to shipping address
         if (isFirstStep && values.adresseDeLivraison.isSameAddress) {
@@ -107,6 +92,7 @@ const Checkout = () => {
         }
 
         if (isSecondStep) {
+            console.log("Condition isSecondStep est vraie.");
             makePayment(values);
         }
 
@@ -114,10 +100,11 @@ const Checkout = () => {
     };
 
     async function makePayment(values) {
+        console.log("La fonction makePayment a été appelée.");
         const stripe = await stripePromise;
         const requestBody = {
-            userName: [values.prenoms, values.nomDeFamille].join(" "),
-            email: values.email,
+            userName: [values.adresseDeFacturation.prénoms, values.adresseDeFacturation.nomDeFamille].join(" "),
+            email: values.Email,
             products: cart.map(({ id, count }) => ({
                 id,
                 count,
@@ -130,11 +117,12 @@ const Checkout = () => {
             body: JSON.stringify(requestBody)
         });
         const session = await response.json();
+        console.log(session.id)
         await stripe.redirectToCheckout({
             sessionId: session.id
         });
-    }
-
+    };
+    
     return <Box width="80%" m="100px auto">
         <Stepper activeStep={activeStep} sx={{ m:"20px 0"}}>
             <Step>
@@ -162,22 +150,22 @@ const Checkout = () => {
                     <form onSubmit={handleSubmit}>
                         {isFirstStep && (
                             <Shipping 
-                            values={values}
-                            errors={errors}
-                            touched={touched}
-                            handleBlur={handleBlur}
-                            handleChange={handleChange}
-                            setFieldValue={setFieldValue}
+                                values={values}
+                                errors={errors}
+                                touched={touched}
+                                handleBlur={handleBlur}
+                                handleChange={handleChange}
+                                setFieldValue={setFieldValue}
                             />
                         )}
                         {isSecondStep && (
                             <Payment
-                            values={values}
-                            errors={errors}
-                            touched={touched}
-                            handleBlur={handleBlur}
-                            handleChange={handleChange}
-                            setFieldValue={setFieldValue}
+                                values={values}
+                                errors={errors}
+                                touched={touched}
+                                handleBlur={handleBlur}
+                                handleChange={handleChange}
+                                setFieldValue={setFieldValue}
                             />
                         )}
                         <Box display="flex" justifyContent="space-between" gap="50px">
@@ -196,7 +184,7 @@ const Checkout = () => {
                                     onClick={() => setActiveStep(activeStep - 1)}
                                 >Précédent</Button>
                             )}
-                            <Button
+                                <Button
                                     fullWidth
                                     type="submit"
                                     color="primary"
@@ -208,8 +196,20 @@ const Checkout = () => {
                                         borderRadius: 0,
                                         padding: "15px 40px",
                                     }}
-                                    onClick={() => setActiveStep(activeStep - 1)}
-                                >{isFirstStep ? "Suivant" : "Passer la commande" }</Button>
+                                    onClick={() => {
+                                        console.log("Bouton Suivant cliqué");
+                                        if (isFirstStep) {
+                                            // Si c'est la première étape, soumettez le formulaire.
+                                            setActiveStep(activeStep + 1);
+                                            handleSubmit();
+                                        } else {
+                                            // Sinon, appelez makePayment.
+                                            makePayment(values);
+                                        }
+                                    }}
+                                >
+                                    {isFirstStep ? "Suivant" : "Passer la commande" }
+                                </Button>
                         </Box>
                     </form>
                 )}
